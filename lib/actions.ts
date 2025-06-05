@@ -2,7 +2,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { insertTopic } from "./data";
+import { incrementVotes, insertQuestion, insertTopic } from "./data";
 import { redirect } from "next/navigation";
 
 export async function addTopic(data: FormData) {
