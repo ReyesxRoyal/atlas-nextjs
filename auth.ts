@@ -9,30 +9,33 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     buttonText: "#ffffff",
   },
   providers: [
-   Credentials({
-    credentials: {
-      email: {
-        label: "Email",
+    Credentials({
+      credentials: {
+        email: {
+          label: "Email",
+        },
+        password: {
+          label: "Password",
+          type: "password",
+        },
       },
-      password: {
-        label: "Password",
-        type: "password",
+      async authorize(credentials) {
+        const { email, password } = credentials;
+        const user = await fetchUser(email);
+        
+        if (!user) return null;
+        const passwordsMatch = await bcrypt.compare(password, user.password);
+        
+        if (passwordsMatch) {
+          return user;
+        }
+        return null;
       },
-    },
-    //@ts-ignore
-    authorize: async (credentials: { email: string; password: string }) => {
-      const { email, password } = credentials;
-      const user = await fetchUser(email);
-      if (!user) return null; //@ts-ignore
-      const passwordsMatch = await bcrypt.compare(password, user.password);
-      if (passwordsMatch) return user;
-      return null;
-    },
-  }),
-   callbacks, {
+    }),
+  ],
+  callbacks: {
     authorized: async ({ auth }) => {
-      // Logged in users are authenticated, otherwise redirect to login page
       return !!auth;
     },
   },
-,);
+});
